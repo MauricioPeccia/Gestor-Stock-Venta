@@ -59,5 +59,15 @@ namespace UI.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap abstract_rough_gradient_background_black_blue_white_design_templates_free_photo {
+            get {
+                object obj = ResourceManager.GetObject("abstract-rough-gradient-background-black-blue-white-design-templates-free-photo", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

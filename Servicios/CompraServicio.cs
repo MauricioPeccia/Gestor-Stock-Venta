@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Entidades;
 
 namespace Servicios;
@@ -78,5 +78,28 @@ public class CompraServicio
             return compraId;
         }
         catch { await tx.RollbackAsync(); throw; }
+    }
+
+    public async Task<IEnumerable<dynamic>> ListarComprasAsync(int limite = 50)
+    {
+        await using var cn = await Conexion.AbrirAsync();
+        return await cn.QueryAsync(
+            @"SELECT c.id, c.fecha, c.nro_comprobante AS NroComprobante, c.total,
+                     c.pagada_con_caja AS PagadaConCaja, c.observaciones,
+                     COALESCE(p.nombre, 'Sin proveedor') AS Proveedor
+              FROM compras c
+              LEFT JOIN proveedores p ON p.id = c.proveedor_id
+              ORDER BY c.id DESC LIMIT @limite", new { limite });
+    }
+
+    public async Task<IEnumerable<dynamic>> DetalleDeCompraAsync(long compraId)
+    {
+        await using var cn = await Conexion.AbrirAsync();
+        return await cn.QueryAsync(
+            @"SELECT d.producto_id AS ProductoId, p.nombre AS Nombre, d.cantidad AS Cantidad,
+                     d.costo_unitario AS CostoUnitario, d.subtotal AS Subtotal
+              FROM compra_detalle d
+              JOIN productos p ON p.id = d.producto_id
+              WHERE d.compra_id = @compraId", new { compraId });
     }
 }

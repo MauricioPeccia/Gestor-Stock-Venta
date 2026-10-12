@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Entidades;
 
 namespace Servicios;
@@ -107,5 +107,25 @@ public class VentaServicio
         return await cn.QueryAsync(
             "SELECT id, fecha, total, estado FROM ventas WHERE jornada_id=@jornadaId ORDER BY id DESC",
             new { jornadaId });
+    }
+
+    public async Task<IEnumerable<dynamic>> DetalleDeVentaAsync(long ventaId)
+    {
+        await using var cn = await Conexion.AbrirAsync();
+        return await cn.QueryAsync(
+            @"SELECT d.producto_id AS ProductoId, p.nombre AS Nombre, d.cantidad AS Cantidad,
+                     d.precio_unitario AS PrecioUnitario, d.subtotal AS Subtotal
+              FROM venta_detalle d
+              JOIN productos p ON p.id = d.producto_id
+              WHERE d.venta_id = @ventaId",
+            new { ventaId });
+    }
+
+    public async Task<IEnumerable<dynamic>> PagosDeVentaAsync(long ventaId)
+    {
+        await using var cn = await Conexion.AbrirAsync();
+        return await cn.QueryAsync(
+            "SELECT metodo AS Metodo, monto AS Monto FROM venta_pagos WHERE venta_id = @ventaId",
+            new { ventaId });
     }
 }
