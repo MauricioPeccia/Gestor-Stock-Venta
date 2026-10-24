@@ -1,17 +1,41 @@
-namespace GestorC
+using System;
+using System.Windows.Forms;
+using KioscoLite.CapaDatos;
+using KioscoLite.CapaPresentacion;
+
+namespace KioscoLite
 {
     internal static class Program
     {
         /// <summary>
-        ///  The main entry point for the application.
+        /// Punto de entrada principal para Kiosco Lite.
+        /// Inicializa los recursos GDI+ compartidos, ejecuta el menú radial y libera toda la memoria al cerrar.
         /// </summary>
         [STAThread]
-        static void Main()
+        private static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
-            ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+            Application.SetHighDpiMode(HighDpiMode.SystemAware);
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            // 1. Pre-carga única de fuentes, colores y pinceles GDI+ en memoria
+            RecursosUI.Inicializar();
+
+            try
+            {
+                // 2. Arranque de la ventana principal con disposición garantizada al salir
+                using (var formPrincipal = new FormPrincipal())
+                {
+                    Application.Run(formPrincipal);
+                }
+            }
+            finally
+            {
+                // 3. Liberación determinista de conexiones MySQL, objetos GDI+ y compactación de memoria RAM
+                ConexionDB.CerrarPoolConexiones();
+                RecursosUI.LiberarRecursos();
+                Optimizador.LiberarMemoria();
+            }
         }
     }
 }

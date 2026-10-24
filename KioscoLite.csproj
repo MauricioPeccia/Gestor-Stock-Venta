@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <StartupObject>KioscoLite.Program</StartupObject>
+
+    <!-- Optimización de Memoria para Hardware Modesto (Core i3 / 16GB RAM DDR3): Workstation GC -->
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+  </PropertyGroup>
+
+  <!-- ========================================================================= -->
+  <!-- PASO 3: Perfil de Producción ('Release') con Optimización Extrema         -->
+  <!-- ========================================================================= -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <!-- 1. Optimización máxima de compilador IL y JIT -->
+    <Optimize>true</Optimize>
+    <TieredCompilation>true</TieredCompilation>
+    <TieredPGO>true</TieredPGO>
+
+    <!-- 2. Desactivación total de símbolos de depuración (.pdb) -->
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+    <DebuggerSupport>false</DebuggerSupport>
+
+    <!-- 3. Precompilación nativa ReadyToRun (arranque instantáneo en Intel Core i3) -->
+    <PublishReadyToRun>true</PublishReadyToRun>
+
+    <!-- 4. Configuración segura de Trimming (modo partial con preservación de ensamblados críticos) -->
+    <PublishTrimmed>false</PublishTrimmed>
+    <TrimMode>partial</TrimMode>
+    <_SuppressWinFormsTrimError>true</_SuppressWinFormsTrimError>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
+    <EventSourceSupport>false</EventSourceSupport>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+  </PropertyGroup>
+
+  <!-- Preservación explícita contra Trimming para no romper MySQL Transaccional ni WinForms -->
+  <ItemGroup Condition="'$(Configuration)' == 'Release'">
+    <TrimmerRootAssembly Include="MySql.Data" />
+    <TrimmerRootAssembly Include="System.Windows.Forms" />
+    <TrimmerRootAssembly Include="System.Configuration.ConfigurationManager" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MySql.Data" Version="26.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="App.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
